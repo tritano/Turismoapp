@@ -1,33 +1,56 @@
-// models/User.js
-
 const { Sequelize, DataTypes } = require('sequelize');
-const sequelize = require('../config/db.config.js'); // Importa la instancia de Sequelize
+const bcrypt = require('bcrypt');
+const sequelize = require('../config/db.config.js');
 
-// Define el modelo de usuario
 const User = sequelize.define('User', {
-  // Define las columnas de la tabla
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  username: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  email: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true
-  },
-  password: {
-    type: DataTypes.STRING,
-    allowNull: false
-  }
-}, {
-  // Opciones adicionales del modelo
-  tableName: 'users', // Nombre de la tabla en la base de datos
-  timestamps: true, // Habilita la creación automática de campos "createdAt" y "updatedAt"
+    // Definición de atributos omitida por brevedad
 });
+
+// Método para crear un usuario con transacción
+User.createWithTransaction = async function(userData) {
+    let transaction;
+    try {
+        // Iniciar una transacción
+        transaction = await sequelize.transaction();
+
+        // Crear el usuario dentro de la transacción
+        const user = await User.create(userData, { transaction });
+
+        // Completar la transacción
+        await transaction.commit();
+
+        return user;
+    } catch (error) {
+        // Revertir la transacción si hay un error
+        if (transaction) await transaction.rollback();
+        throw error;
+    }
+};
+
+// Método para actualizar un usuario con transacción
+User.prototype.updateWithTransaction = async function(updatedData) {
+    let transaction;
+    try {
+        // Iniciar una transacción
+        transaction = await sequelize.transaction();
+
+        // Actualizar el usuario dentro de la transacción
+        await this.update(updatedData, { transaction });
+
+        // Completar la transacción
+        await transaction.commit();
+
+        return this;
+    } catch (error) {
+        // Revertir la transacción si hay un error
+        if (transaction) await transaction.rollback();
+        throw error;
+    }
+};
+
+// Método para comparar contraseñas hasheadas
+User.prototype.comparePassword = function(candidatePassword) {
+    return bcrypt.compareSync(candidatePassword, this.password);
+};
 
 module.exports = User;
