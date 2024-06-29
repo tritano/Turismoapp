@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database'); // Asegúrate de ajustar la ruta al archivo de configuración de tu base de datos
+const sequelize = require('../config/database');
+const Department = require('./Department');
 
 const Employee = sequelize.define('Employee', {
     id: {
@@ -9,31 +10,68 @@ const Employee = sequelize.define('Employee', {
     },
     firstName: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+        validate: {
+            notNull: {
+                msg: 'El nombre no puede ser nulo'
+            }
+        }
     },
     lastName: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+        validate: {
+            notNull: {
+                msg: 'El apellido no puede ser nulo'
+            }
+        }
     },
     email: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true
+        unique: true,
+        validate: {
+            notNull: {
+                msg: 'El correo electrónico no puede ser nulo'
+            },
+            isEmail: {
+                msg: 'Debe ser una dirección de correo electrónico válida'
+            }
+        }
     },
     phone: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        validate: {
+            isNumeric: {
+                msg: 'El número de teléfono debe ser numérico'
+            }
+        }
     },
     hireDate: {
-        type: DataTypes.DATE
+        type: DataTypes.DATE,
+        validate: {
+            isDate: {
+                msg: 'La fecha de contratación debe ser una fecha válida'
+            }
+        }
     },
     position: {
         type: DataTypes.STRING
     },
     salary: {
-        type: DataTypes.DECIMAL(10, 2)
+        type: DataTypes.DECIMAL(10, 2),
+        validate: {
+            isDecimal: {
+                msg: 'El salario debe ser un número decimal'
+            }
+        }
     },
-    department: {
-        type: DataTypes.STRING
+    departmentId: {
+        type: DataTypes.INTEGER,
+        references: {
+            model: Department,
+            key: 'id'
+        }
     },
     createdAt: {
         type: DataTypes.DATE,
@@ -46,5 +84,7 @@ const Employee = sequelize.define('Employee', {
 }, {
     timestamps: true
 });
+
+Employee.belongsTo(Department, { foreignKey: 'departmentId', as: 'department' });
 
 module.exports = Employee;
