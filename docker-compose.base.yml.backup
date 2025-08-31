@@ -1,0 +1,57 @@
+networks:
+  turismoapp-internal:
+    driver: bridge
+    internal: true
+
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env  # ✅ Usar variables del archivo .env
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - turismoapp-internal
+
+  couchdb:
+    ports:
+      - "5984:5984"
+    image: couchdb:3.3
+    ports:
+      - "5984:5984"
+    env_file:
+      - .env  # ✅ Usar variables del archivo .env
+    environment:
+      COUCHDB_USER: ${COUCHDB_USER}
+      COUCHDB_PASSWORD: ${COUCHDB_PASSWORD}
+    ports:
+      - "5985:5984"
+    volumes:
+      - couchdb_data:/opt/couchdb/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5984/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - turismoapp-internal
+
+volumes:
+  postgres_data:
+  couchdb_data:

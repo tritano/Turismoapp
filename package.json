@@ -1,0 +1,19 @@
+{
+  "name": "turismoapp",
+  "version": "1.0.0",
+  "description": "Plataforma turística completa con NestJS, React, PostgreSQL y CouchDB",
+  "scripts": {
+    "dev:backend": "npm run dev -w backend",
+    "dev:frontend": "npm run dev -w frontend",
+    "build:backend": "npm run build -w backend",
+    "build:frontend": "npm run build -w frontend",
+    "start:backend": "npm start -w backend",
+    "start:frontend": "npm start -w frontend",
+    "docker:dev": "docker compose -f docker-compose.base.yml -f docker-compose.dev.yml up",
+    "docker:prod": "docker compose -f docker-compose.base.yml -f docker-compose.yml up -d"
+  },
+  "workspaces": ["backend", "frontend"],
+  "keywords": ["turismo", "nestjs", "react", "postgresql", "couchdb"],
+  "author": "Tritan",
+  "license": "MIT"
+}

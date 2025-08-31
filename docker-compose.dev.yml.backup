@@ -1,0 +1,41 @@
+services:
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3002:3000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    env_file:
+      - .env  # ✅ Cargar variables desde .env
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      postgres:
+        condition: service_healthy
+      couchdb:
+        condition: service_healthy
+    networks:
+      - turismoapp-internal
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3003:3001"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    env_file:
+      - .env  # ✅ Cargar variables desde .env
+    depends_on:
+      - backend
+    networks:
+      - turismoapp-internal
+
+networks:
+  turismoapp-internal:
+    external: true
